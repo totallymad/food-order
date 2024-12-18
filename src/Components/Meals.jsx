@@ -23,17 +23,10 @@ export default function Meals() {
     fetchData();
   }, []);
 
-
   return (
     <ul id="meals">
       {loadedMeals.map((meal) => (
-        <Item
-          key={meal.id}
-          name={meal.name}
-          price={meal.price}
-          descr={meal.description}
-          image={meal.image}
-        />
+        <Item key={meal.id} meal={meal} />
       ))}
     </ul>
   );

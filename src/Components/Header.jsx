@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import logo from "../assets/logo.jpg";
+import CartContext from "../store/CartContext";
+import UserProgresContext from "../store/UserProgresContext";
 
 export default function Header() {
-  const [showModal, setShowModal] = useState(false);
+  const cartContext = useContext(CartContext);
+  const userProgresCtx = useContext(UserProgresContext);
 
-  function handleShowingModal() {
-    setShowModal((prevState) => !prevState);
-    console.log("show");
+  const totalCartItems = cartContext.items.reduce((total, item) => {
+    return total + item.quantity;
+  }, 0);
+
+  function handleShowCart() {
+    userProgresCtx.showCart();
   }
 
   return (
@@ -16,11 +22,10 @@ export default function Header() {
         <h1>reactfood</h1>
       </div>
       <nav>
-        <button className="button" onClick={handleShowingModal}>
-          Cart (0)
+        <button className="button" onClick={handleShowCart}>
+          Cart ({totalCartItems})
         </button>
       </nav>
-      {showModal && <div className="modal">Modal</div>}
     </header>
   );
 }
