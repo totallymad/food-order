@@ -1,3 +1,5 @@
+import { formatNumber } from "../utils/formatter";
+
 export default function CartItem({
   name,
   quantity,
@@ -8,7 +10,7 @@ export default function CartItem({
   return (
     <li className="cart-item">
       <p>
-        {name} - {quantity} x {price}
+        {name} - {quantity} x {formatNumber(price)}
       </p>
       <p className="cart-item-actions">
         <button onClick={onDecrease}>-</button>

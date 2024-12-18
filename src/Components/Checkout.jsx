@@ -1,12 +1,28 @@
 import { useContext } from "react";
+import { useActionState } from "react";
+
 import Modal from "./UI/Modal";
 import CartContext from "../store/CartContext";
 import Input from "./UI/Input";
 import UserProgresContext from "../store/UserProgresContext";
+import useHttp from "./hooks/useHttp";
+import Error from "./Error";
+
+const requestConfig = {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+};
 
 export default function Checkout() {
   const cartContext = useContext(CartContext);
   const userProgresCtx = useContext(UserProgresContext);
+
+  const { data, error, sendRequest, clearData } = useHttp(
+    "http://localhost:3000/orders",
+    requestConfig
+  );
 
   const cartTotal = cartContext.items.reduce((total, item) => {
     total + item.quantity * item.price;
@@ -16,29 +32,64 @@ export default function Checkout() {
     userProgresCtx.hideCheckout();
   }
 
-  function handleSubmit(event) {
-    event.preventDefault();
+  function handleFinish() {
+    userProgresCtx.hideCheckout();
+    cartContext.clearCart();
+    clearData();
+  }
 
-    const fd = new FormData(event.target);
+  async function checkoutAction(prevState, fd) {
     const customerData = Object.fromEntries(fd.entries());
 
-    fetch("http://localhost:3000/orders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    await sendRequest(
+      JSON.stringify({
         order: {
           items: cartContext.items,
           customer: customerData,
         },
-      }),
-    });
+      })
+    );
+  }
+
+  const [formState, formAction, pending] = useActionState(checkoutAction, null);
+
+  let actions = (
+    <>
+      <button onClick={handleClose} type="button" className="text-button">
+        Закрыть
+      </button>
+      <button className="button">Потвердить заказ</button>
+    </>
+  );
+
+  if (pending) {
+    actions = <span>Отправка данных...</span>;
+  }
+
+  if (data && !error) {
+    return (
+      <Modal
+        open={userProgresCtx.progress === "checkout"}
+        onClose={handleFinish}
+      >
+        <h2>Успешно!</h2>
+        <p>Ваш заказ был принят успешно</p>
+        <p>
+          Мы сообщим подробности по электронной почте в течение нескольких минут
+          😊😊😊{" "}
+        </p>
+        <p className="modal-actions">
+          <button onClick={handleFinish} className="button">
+            Окей!
+          </button>
+        </p>
+      </Modal>
+    );
   }
 
   return (
     <Modal open={userProgresCtx.progress === "checkout"} onClose={handleClose}>
-      <form onSubmit={handleSubmit}>
+      <form action={formAction}>
         <h2>Оформление</h2>
         <p>Полная стоимость: {cartTotal}</p>
 
@@ -50,12 +101,9 @@ export default function Checkout() {
           <Input label="Город" type="text" id="city" />
         </div>
 
-        <p className="modal-actions">
-          <button onClick={handleClose} type="button" className="text-button">
-            Закрыть
-          </button>
-          <button className="button">Потвердить заказ</button>
-        </p>
+        {error && <Error title="Ошибка при отправке" message={error} />}
+
+        <p className="modal-actions">{actions}</p>
       </form>
     </Modal>
   );

@@ -3,6 +3,7 @@ import Modal from "./UI/Modal";
 import CartContext from "../store/CartContext";
 import UserProgresContext from "../store/UserProgresContext";
 import CartItem from "./CartItem";
+import { formatNumber } from "../utils/formatter";
 
 export default function Cart() {
   const cartContext = useContext(CartContext);
@@ -39,7 +40,7 @@ export default function Cart() {
           />
         ))}
       </ul>
-      <p className="cart-total">{cartTotal}</p>
+      <p className="cart-total">{formatNumber(cartTotal)}</p>
       <p className="modal-actions">
         {" "}
         <button onClick={handleCloseCart} className="text-button">
