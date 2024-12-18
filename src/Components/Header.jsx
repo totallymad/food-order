@@ -23,7 +23,7 @@ export default function Header() {
       </div>
       <nav>
         <button className="button" onClick={handleShowCart}>
-          Cart ({totalCartItems})
+          Корзина ({totalCartItems})
         </button>
       </nav>
     </header>

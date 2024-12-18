@@ -2,6 +2,7 @@ import { useContext } from "react";
 import Modal from "./UI/Modal";
 import CartContext from "../store/CartContext";
 import UserProgresContext from "../store/UserProgresContext";
+import CartItem from "./CartItem";
 
 export default function Cart() {
   const cartContext = useContext(CartContext);
@@ -15,25 +16,40 @@ export default function Cart() {
     userProgresCtx.hideCart();
   }
 
+  function handleGoToCheckout() {
+    userProgresCtx.showCheckout();
+  }
+
   return (
-    <Modal className="cart" open={userProgresCtx.progress === "cart"}>
-      <h2>Your Cart</h2>
+    <Modal
+      className="cart"
+      open={userProgresCtx.progress === "cart"}
+      onClose={userProgresCtx.progress === "cart" ? handleCloseCart : null}
+    >
+      <h2>Ваша корзина</h2>
       <ul>
         {cartContext.items.map((item) => (
-          <li key={item.id}>
-            {item.name} --- {item.quantity}
-          </li>
+          <CartItem
+            key={item.id}
+            name={item.name}
+            price={item.price}
+            quantity={item.quantity}
+            onIncrease={() => cartContext.addItem(item)}
+            onDecrease={() => cartContext.removeItem(item.id)}
+          />
         ))}
       </ul>
       <p className="cart-total">{cartTotal}</p>
       <p className="modal-actions">
         {" "}
-        <button onClick={handleCloseCart} className="button">
+        <button onClick={handleCloseCart} className="text-button">
           Закрыть
         </button>
-        <button onClick={handleCloseCart} className="button">
-          Продолжить оформление
-        </button>
+        {cartContext.items.length > 0 ? (
+          <button onClick={handleGoToCheckout} className="button">
+            Оформить
+          </button>
+        ) : null}
       </p>
     </Modal>
   );
